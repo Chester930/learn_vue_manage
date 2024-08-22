@@ -1,9 +1,11 @@
+vue
 <script setup>
+import { ref, onMounted } from 'vue'; // 引入 ref 和 onMounted
+import axios from 'axios'; // 引入 Axios
 import MiniStatisticsCard from "@/examples/Cards/MiniStatisticsCard.vue";
 import GradientLineChart from "@/examples/Charts/GradientLineChart.vue";
 import Carousel from "./components/Carousel.vue";
 import CategoriesList from "./components/CategoriesList.vue";
-
 import US from "@/assets/img/icons/flags/US.png";
 import DE from "@/assets/img/icons/flags/DE.png";
 import GB from "@/assets/img/icons/flags/GB.png";
@@ -39,7 +41,25 @@ const sales = {
     flag: BR,
   },
 };
+
+const userCount = ref(0); // 用來存儲用戶數量，使用 ref 以便能夠響應式更新
+
+// 獲取用戶數量的函數
+const fetchUserCount = async () => {
+  try {
+    const response = await axios.get('http://localhost:8080/myapp/admin/users/count'); // 獲取用戶數量
+    userCount.value = response.data; // 將返回的用戶數量賦值給 userCount
+  } catch (error) {
+    console.error("Error fetching user count:", error);
+  }
+};
+
+// 在組件加載時調用 fetchUserCount
+onMounted(() => {
+  fetchUserCount();
+});
 </script>
+
 <template>
   <div class="py-4 container-fluid">
     <div class="row">
@@ -47,17 +67,15 @@ const sales = {
         <div class="row">
           <div class="col-lg-3 col-md-6 col-12">
             <mini-statistics-card
-              title="用戶數輛"
-              value="150人"
-              description="<span
-                class='text-sm font-weight-bolder text-success'
-                >+55%</span> since yesterday"
-              :icon="{
-                component: 'ni ni-money-coins',
-                background: 'bg-gradient-primary',
-                shape: 'rounded-circle',
-              }"
-            />
+  title="用戶數量"
+  :value="userCount ? `${userCount}人` : '0人'" 
+  description="<span class='text-sm font-weight-bolder text-success'>+55%</span> since yesterday"
+  :icon="{
+    component: 'ni ni-money-coins',
+    background: 'bg-gradient-primary',
+    shape: 'rounded-circle',
+  }"
+/>
           </div>
           <div class="col-lg-3 col-md-6 col-12">
             <mini-statistics-card

@@ -96,7 +96,7 @@ defineProps({
               href="https://www.creative-tim.com/product/vue-argon-dashboard"
               class="btn btn-sm mb-0 me-1"
               :class="isBtn"
-              >Free download</a
+              >下載</a
             >
           </li>
         </ul>

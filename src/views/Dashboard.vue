@@ -47,8 +47,8 @@ const sales = {
         <div class="row">
           <div class="col-lg-3 col-md-6 col-12">
             <mini-statistics-card
-              title="Today's Money"
-              value="$53,000"
+              title="用戶數輛"
+              value="150人"
               description="<span
                 class='text-sm font-weight-bolder text-success'
                 >+55%</span> since yesterday"
@@ -61,8 +61,8 @@ const sales = {
           </div>
           <div class="col-lg-3 col-md-6 col-12">
             <mini-statistics-card
-              title="Today's Users"
-              value="2,300"
+              title="創作者數量"
+              value="11人"
               description="<span
                 class='text-sm font-weight-bolder text-success'
                 >+3%</span> since last week"
@@ -75,8 +75,8 @@ const sales = {
           </div>
           <div class="col-lg-3 col-md-6 col-12">
             <mini-statistics-card
-              title="New Clients"
-              value="+3,462"
+              title="課程數量"
+              value="37堂"
               description="<span
                 class='text-sm font-weight-bolder text-danger'
                 >-2%</span> since last quarter"
@@ -89,7 +89,7 @@ const sales = {
           </div>
           <div class="col-lg-3 col-md-6 col-12">
             <mini-statistics-card
-              title="Sales"
+              title="今日交易金額"
               value="$103,430"
               description="<span
                 class='text-sm font-weight-bolder text-success'

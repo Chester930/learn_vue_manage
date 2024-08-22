@@ -37,7 +37,7 @@ const getRoute = () => {
         <sidenav-item
           to="/tables"
           :class="getRoute() === 'tables' ? 'active' : ''"
-          :navText="isRTL ? 'الجداول' : 'Tables'"
+          :navText="isRTL ? 'الجداول' : '日曆'"
         >
           <template v-slot:icon>
             <i
@@ -51,7 +51,7 @@ const getRoute = () => {
         <sidenav-item
           to="/billing"
           :class="getRoute() === 'billing' ? 'active' : ''"
-          :navText="isRTL ? 'الفواتیر' : 'Billing'"
+          :navText="isRTL ? 'الفواتیر' : '交易'"
         >
           <template v-slot:icon>
             <i class="ni ni-credit-card text-success text-sm opacity-10"></i>
@@ -63,7 +63,7 @@ const getRoute = () => {
         <sidenav-item
           to="/virtual-reality"
           :class="getRoute() === 'virtual-reality' ? 'active' : ''"
-          :navText="isRTL ? 'الواقع الافتراضي' : 'Virtual Reality'"
+          :navText="isRTL ? 'الواقع الافتراضي' : '虛擬實境'"
         >
           <template v-slot:icon>
             <i class="ni ni-app text-info text-sm opacity-10"></i>
@@ -75,7 +75,7 @@ const getRoute = () => {
         <sidenav-item
           to="/rtl-page"
           :class="getRoute() === 'rtl-page' ? 'active' : ''"
-          navText="RTL"
+          navText="特殊頁面"
         >
           <template v-slot:icon>
             <i class="ni ni-world-2 text-danger text-sm opacity-10"></i>
@@ -89,7 +89,7 @@ const getRoute = () => {
           class="text-xs ps-4 text-uppercase font-weight-bolder opacity-6"
           :class="isRTL ? 'me-4' : 'ms-2'"
         >
-          صفحات المرافق
+          特殊頁面
         </h6>
 
         <h6
@@ -97,7 +97,7 @@ const getRoute = () => {
           class="text-xs ps-4 text-uppercase font-weight-bolder opacity-6"
           :class="isRTL ? 'me-4' : 'ms-2'"
         >
-          ACCOUNT PAGES
+        帳戶頁面
         </h6>
       </li>
 

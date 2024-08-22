@@ -144,7 +144,7 @@ const handleLogin = async () => {
                   <p class="mx-auto mb-4 text-sm">
                     還沒有帳號？
                     <a
-                      href="javascript:;"
+                      href="Signup"
                       class="text-success text-gradient font-weight-bold"
                       >註冊</a
                     >

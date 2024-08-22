@@ -30,6 +30,8 @@ const darkMode = () => {
     activateDarkMode();
   }
 };
+
+
 </script>
 <template>
   <div class="fixed-plugin">
@@ -54,7 +56,6 @@ const darkMode = () => {
             <i class="fa fa-close"></i>
           </button>
         </div>
-        <!-- End Toggle Button -->
       </div>
       <hr class="my-1 horizontal dark" />
       <div class="pt-0 card-body pt-sm-3">
@@ -99,7 +100,6 @@ const darkMode = () => {
             ></span>
           </div>
         </a>
-        <!-- Sidenav Type -->
         <div class="mt-3">
           <h6 class="mb-0">Sidenav Type</h6>
           <p class="text-sm">Choose between 2 different sidenav types.</p>
@@ -133,8 +133,6 @@ const darkMode = () => {
         <p class="mt-2 text-sm d-xl-none d-block">
           You can change the sidenav type just on desktop view.
         </p>
-        <!-- Navbar Fixed -->
-        <!-- Navbar Fixed -->
         <div class="mt-3 d-flex">
           <h6 class="mb-0">Navbar Fixed</h6>
           <div class="form-check form-switch ps-0 ms-auto my-auto">
@@ -148,7 +146,6 @@ const darkMode = () => {
             />
           </div>
         </div>
-
         <hr class="horizontal dark my-4" />
         <div class="mt-2 mb-5 d-flex">
           <h6 class="mb-0" :class="isRTL ? 'ms-2' : ''">Light / Dark</h6>
@@ -198,6 +195,20 @@ const darkMode = () => {
           </a>
         </div>
       </div>
+      <!-- 新增的右下角關閉按鈕 -->
+      <div class="fixed-plugin-close-container">
+        <button @click="toggleConfigurator" class="btn btn-danger">
+          關閉
+        </button>
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.fixed-plugin-close-container {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
+</style>

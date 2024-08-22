@@ -170,7 +170,7 @@ const handleRegister = async () => {
                 </div>
                 <p class="text-sm mt-3 mb-0">
                   已經有帳戶？
-                  <a href="javascript:;" class="text-dark font-weight-bolder"
+                  <a href="Signin" class="text-dark font-weight-bolder"
                     >登入</a
                   >
                 </p>

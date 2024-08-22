@@ -46,6 +46,11 @@ const routes = [
     component: Profile,
   },
   {
+    path: "/creator",
+    name: "Creator",
+    component: Profile,
+  },
+  {
     path: "/signin",
     name: "Signin",
     component: Signin,

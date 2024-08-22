@@ -70,6 +70,16 @@ defineProps({
             </router-link>
           </li>
           <li class="nav-item">
+            <router-link class="nav-link me-2" to="/creator">
+              <i
+                class="fa fa-user opacity-6 me-1"
+                aria-hidden="true"
+                :class="isBlur ? 'text-dark' : 'text-white'"
+              ></i>
+              創作者專區
+            </router-link>
+          </li>
+          <li class="nav-item">
             <router-link class="nav-link me-2" to="/signup">
               <i
                 class="fas fa-user-circle opacity-6 me-1"

@@ -15,9 +15,12 @@ const body = document.getElementsByTagName("body")[0];
 const store = useStore();
 const router = useRouter();
 
-const username = ref("");
 const email = ref("");
 const password = ref("");
+const fullName = ref("");
+const username = ref("");
+const birthDate = ref("");
+const phoneNumber = ref("");
 const agreeTerms = ref(false);
 const errorMessage = ref("");
 const successMessage = ref("");
@@ -41,34 +44,41 @@ onBeforeUnmount(() => {
 
 const handleRegister = async () => {
   console.log("Agree Terms:", agreeTerms.value);
-
+  
   if (!agreeTerms.value) {
-    errorMessage.value = "Please agree to the Terms and Conditions";
+    errorMessage.value = "請同意條款與條件";
     return;
   }
-
+  
   isLoading.value = true;
   errorMessage.value = "";
   successMessage.value = "";
-
+  
   try {
     const response = await axios.post("http://localhost:8080/myapp/user/register", {
-      username: username.value,
       email: email.value,
-      pwd: password.value
+      password: password.value,
+      fullName: fullName.value,
+      username: username.value,
+      birthDate: birthDate.value,
+      phoneNumber: phoneNumber.value
     });
-
-    console.log("Registration successful:", response.data);
-    successMessage.value = "跳轉登入頁面中...";
     
-    // 延遲 2 秒後跳轉到首頁
-    setTimeout(() => {
-      router.push('/signin');  // 假設首頁的路由是 '/'
-    }, 1000);
-
+    if (response.data.success) {
+      console.log("註冊成功:", response.data.message);
+      successMessage.value = "註冊成功，跳轉登入頁面中...";
+      
+      setTimeout(() => {
+        router.push('/signin');
+      }, 1000);
+    } else {
+      console.error("註冊失敗:", response.data.message);
+      errorMessage.value = response.data.message;
+    }
+    
   } catch (error) {
-    console.error("Registration failed:", error);
-    errorMessage.value = "Registration failed. Please try again.";
+    console.error("註冊失敗:", error);
+    errorMessage.value = "註冊失敗，請再試一次。";
   } finally {
     isLoading.value = false;
   }
@@ -116,11 +126,18 @@ const handleRegister = async () => {
             <div class="card-body">
               <form role="form" @submit.prevent="handleRegister">
                 <argon-input
-                  id="name"
+                  id="fullName"
+                  v-model="fullName"
+                  type="text"
+                  placeholder="全名"
+                  aria-label="Full Name"
+                />
+                <argon-input
+                  id="username"
                   v-model="username"
                   type="text"
-                  placeholder="名稱"
-                  aria-label="Name"
+                  placeholder="用戶名"
+                  aria-label="Username"
                 />
                 <argon-input
                   id="email"
@@ -135,6 +152,20 @@ const handleRegister = async () => {
                   type="password"
                   placeholder="密碼"
                   aria-label="Password"
+                />
+                <argon-input
+                  id="birthDate"
+                  v-model="birthDate"
+                  type="date"
+                  placeholder="出生日期"
+                  aria-label="Birth Date"
+                />
+                <argon-input
+                  id="phoneNumber"
+                  v-model="phoneNumber"
+                  type="tel"
+                  placeholder="電話號碼（選填）"
+                  aria-label="Phone Number"
                 />
                 <div class="form-check">
                   <input

@@ -60,8 +60,8 @@ onBeforeUnmount(() => {
             </div>
             <div class="col-auto my-auto">
               <div class="h-100">
-                <h5 class="mb-1">管理員名稱</h5>
-                <p class="mb-0 font-weight-bold text-sm">管理員等級</p>
+                <h5 class="mb-1">名稱</h5>
+                <p class="mb-0 font-weight-bold text-sm">身分</p>
               </div>
             </div>
             <div

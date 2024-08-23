@@ -116,8 +116,20 @@ const getRoute = () => {
       <li class="nav-item">
         <sidenav-item
           to="/Creator"
-          :class="getRoute() === 'profile' ? 'active' : ''"
+          :class="getRoute() === 'creator' ? 'active' : ''"
           :navText="isRTL ? 'حساب تعريفي' : '創作者專區'"
+        >
+          <template v-slot:icon>
+            <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+
+      <li class="nav-item">
+        <sidenav-item
+          to="/Admin"
+          :class="getRoute() === 'admin' ? 'active' : ''"
+          :navText="isRTL ? 'حساب تعريفي' : '管理員專區'"
         >
           <template v-slot:icon>
             <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>

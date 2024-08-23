@@ -1,13 +1,16 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Dashboard from "../views/Dashboard.vue";
-import Tables from "../views/Tables.vue";
+import Admin from "../views/Admin.vue";
 import Billing from "../views/Billing.vue";
-import VirtualReality from "../views/VirtualReality.vue";
-import RTL from "../views/Rtl.vue";
+import Dashboard from "../views/Dashboard.vue";
 import Profile from "../views/Profile.vue";
-import Signup from "../views/Signup.vue";
+import RTL from "../views/Rtl.vue";
 import Signin from "../views/Signin.vue";
+import Signup from "../views/Signup.vue";
+import Tables from "../views/Tables.vue";
+import VirtualReality from "../views/VirtualReality.vue";
 import Login from "../views/login.vue";
+import Creator from "../views/Creator.vue";
+
 
 const routes = [
   {
@@ -48,7 +51,7 @@ const routes = [
   {
     path: "/creator",
     name: "Creator",
-    component: Profile,
+    component: Creator,
   },
   {
     path: "/signin",
@@ -64,6 +67,11 @@ const routes = [
     path: "/login",
     name: "login",
     component: Login,
+  },
+  {
+    path: "/admin",
+    name: "Admin",
+    component: Admin,
   }
 ];
 

@@ -60,8 +60,7 @@ onBeforeUnmount(() => {
             </div>
             <div class="col-auto my-auto">
               <div class="h-100">
-                <h5 class="mb-1">管理員名稱</h5>
-                <p class="mb-0 font-weight-bold text-sm">管理員等級</p>
+                <h5 class="mb-1">創作者名稱</h5>
               </div>
             </div>
             <div
@@ -121,7 +120,7 @@ onBeforeUnmount(() => {
                           </g>
                         </g>
                       </svg>
-                      <span class="ms-1">App</span>
+                      <span class="ms-1">IG</span>
                     </a>
                   </li>
                   <li class="nav-item">
@@ -141,7 +140,7 @@ onBeforeUnmount(() => {
                         xmlns="http://www.w3.org/2000/svg"
                         xmlns:xlink="http://www.w3.org/1999/xlink"
                       >
-                        <title>document</title>
+                        <title>FB</title>
                         <g
                           stroke="none"
                           stroke-width="1"
@@ -169,7 +168,7 @@ onBeforeUnmount(() => {
                           </g>
                         </g>
                       </svg>
-                      <span class="ms-1">Messages</span>
+                      <span class="ms-1">YT</span>
                     </a>
                   </li>
                   <li class="nav-item">

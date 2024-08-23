@@ -53,16 +53,27 @@ const handleLogin = async () => {
       password: password.value
     });
 
-    console.log("登入成功:", response.data);
-    successMessage.value = "登入成功！正在跳轉到首頁...";
-    
-    setTimeout(() => {
-      router.push('/');  // 假設首頁的路由是 '/'
-    }, 1000);
+    const data = response.data;
+
+    if (data.success) {
+      console.log("登入成功:", data);
+      successMessage.value = data.message;
+      
+      // 存儲 token 和用戶信息
+      localStorage.setItem('token', data.token);
+      store.commit('setUser', { id: data.id, email: data.email });
+
+      setTimeout(() => {
+        router.push('/');  // 假設首頁的路由是 '/'
+      }, 1000);
+    } else {
+      console.error("登入失敗:", data);
+      errorMessage.value = data.message;
+    }
 
   } catch (error) {
-    console.error("登入失敗:", error);
-    errorMessage.value = "登入失敗，請檢查您的郵箱和密碼";
+    console.error("登入請求失敗:", error);
+    errorMessage.value = "登入請求失敗，請稍後再試";
   } finally {
     isLoading.value = false;
   }

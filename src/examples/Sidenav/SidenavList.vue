@@ -108,7 +108,7 @@ const getRoute = () => {
           :navText="isRTL ? 'حساب تعريفي' : '個人專區'"
         >
           <template v-slot:icon>
-            <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
+            <i class="ni ni-single-02 text-dark text-sm opacity-1"></i>
           </template>
         </sidenav-item>
       </li>
@@ -124,18 +124,8 @@ const getRoute = () => {
           </template>
         </sidenav-item>
       </li>
-
-      <li class="nav-item">
-        <sidenav-item
-          to="/Admin"
-          :class="getRoute() === 'admin' ? 'active' : ''"
-          :navText="isRTL ? 'حساب تعريفي' : '管理員專區'"
-        >
-          <template v-slot:icon>
-            <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
-          </template>
-        </sidenav-item>
-      </li>
+      
+      
 
       <li class="nav-item">
         <sidenav-item
@@ -157,6 +147,34 @@ const getRoute = () => {
         >
           <template v-slot:icon>
             <i class="ni ni-collection text-info text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+      <li class="mt-3 nav-item">
+        <h6
+          v-if="isRTL"
+          class="text-xs ps-4 text-uppercase font-weight-bolder opacity-6"
+          :class="isRTL ? 'me-4' : 'ms-2'"
+        >
+          特殊頁面
+        </h6>
+
+        <h6
+          v-else
+          class="text-xs ps-4 text-uppercase font-weight-bolder opacity-6"
+          :class="isRTL ? 'me-4' : 'ms-2'"
+        >
+        管理員專區
+        </h6>
+      </li>
+      <li class="nav-item">
+        <sidenav-item
+          to="/Admin"
+          :class="getRoute() === 'admin' ? 'active' : ''"
+          :navText="isRTL ? 'حساب تعريفي' : '控制中心'"
+        >
+          <template v-slot:icon>
+            <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
           </template>
         </sidenav-item>
       </li>

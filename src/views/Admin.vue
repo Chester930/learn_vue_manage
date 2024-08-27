@@ -1,5 +1,4 @@
 vue
-
 <script setup>
 import ArgonInput from "@/components/ArgonInput.vue";
 import ArgonButton from "@/components/ArgonButton.vue";
@@ -9,94 +8,98 @@ import axios from 'axios';
 const usernameSearch = ref('');
 const emailSearch = ref('');
 const users = ref([]);
-const searchType = ref('username'); // 預設搜尋類型為名稱
+const searchType = ref('username');
 const totalUsers = ref(0);
 const message = ref('');
+const isLoading = ref(false);
 
-// 計算屬性：判斷搜尋輸入是否為空
 const isSearchInputEmpty = computed(() => {
   return searchType.value === 'username' ? !usernameSearch.value : !emailSearch.value;
 });
 
-// 搜尋用戶
 const searchUsers = async () => {
+  isLoading.value = true;
+  message.value = '';
   try {
     let response;
     if (searchType.value === 'username' && usernameSearch.value) {
-      response = await axios.get('/admin/users/searchByUsername', { params: { username: usernameSearch.value } });
+      response = await axios.get('http://localhost:8080/myapp/admin/users/searchByUsername', { params: { username: usernameSearch.value } });
     } else if (searchType.value === 'email' && emailSearch.value) {
-      response = await axios.get('/admin/users/searchByEmail', { params: { email: emailSearch.value } });
+      response = await axios.get('http://localhost:8080/myapp/admin/users/searchByEmail', { params: { email: emailSearch.value } });
     } else {
-      response = await axios.get('/admin/users/all');
+      response = await axios.get('http://localhost:8080/myapp/admin/users/all');
     }
-    const data = JSON.parse(response.data);
+
+    const data = response.data;
     if (data.success) {
       users.value = data.users;
-      message.value = '';
+      if (users.value.length === 0) {
+        message.value = '沒有找到匹配的用戶';
+      }
     } else {
       users.value = [];
-      message.value = data.message;
+      message.value = data.message || '搜尋失敗';
     }
   } catch (error) {
     console.error('搜尋用戶時出錯:', error);
     message.value = '搜尋用戶時出錯';
+    users.value = [];
+  } finally {
+    isLoading.value = false;
   }
 };
 
-// 刪除用戶
-const deleteUser = async (id) => {
-  if (confirm('您確定要刪除這個用戶嗎？')) {
+const toggleDeleteUser = async (id, currentStatus) => {
+  const action = currentStatus ? '恢復' : '刪除';
+  if (confirm(`您確定要${action}這個用戶嗎？`)) {
+    isLoading.value = true;
     try {
-      const response = await axios.delete(`/admin/users/delete/${id}`);
-      const data = JSON.parse(response.data);
+      const response = await axios.delete(`http://localhost:8080/myapp/admin/users/toggleDelete/${id}`);
+      const data = response.data;
       if (data.success) {
         message.value = data.message;
-        await searchUsers(); // 刪除後重新搜尋用戶列表
-        await fetchTotalUsers(); // 更新用戶總數
+        await searchUsers();
+        await fetchTotalUsers();
       } else {
-        message.value = data.message;
+        message.value = data.message || `${action}失敗`;
       }
     } catch (error) {
-      console.error('刪除用戶時出錯:', error);
-      message.value = '刪除用戶時出錯';
+      console.error(`${action}用戶時出錯:`, error);
+      message.value = `${action}用戶時出錯`;
+    } finally {
+      isLoading.value = false;
     }
   }
 };
 
-// 獲取用戶總數
 const fetchTotalUsers = async () => {
   try {
-    const response = await axios.get('/admin/users/count');
-    const data = JSON.parse(response.data);
+    const response = await axios.get('http://localhost:8080/myapp/admin/users/count');
+    const data = response.data;
     if (data.success) {
       totalUsers.value = data.count;
     } else {
-      message.value = '獲取用戶總數失敗';
+      console.error('獲取用戶總數失敗');
     }
   } catch (error) {
     console.error('獲取用戶總數時出錯:', error);
-    message.value = '獲取用戶總數時出錯';
   }
 };
 
-// 初始化頁面
 onMounted(() => {
   searchUsers();
   fetchTotalUsers();
 });
 
-// 切換搜尋類型
 const toggleSearchType = () => {
   searchType.value = searchType.value === 'username' ? 'email' : 'username';
   usernameSearch.value = '';
   emailSearch.value = '';
 };
 
-// 處理搜尋
 const handleSearch = () => {
   searchUsers();
 };
-
 </script>
 
 <template>
@@ -126,10 +129,11 @@ const handleSearch = () => {
                       <argon-input id="email-search" type="email" placeholder="輸入電子郵件" v-model="emailSearch" />
                     </div>
                     <div class="input-group-append">
-                      <argon-button 
-                        color="primary" 
-                        size="sm" 
-                        @click="handleSearch" 
+                      <argon-button
+                        color="primary"
+                        size="sm"
+                        @click="handleSearch"
+                        :disabled="isLoading"
                       >
                         {{ isSearchInputEmpty ? '搜尋全部' : '搜尋' }}
                       </argon-button>
@@ -154,6 +158,8 @@ const handleSearch = () => {
                     <th>會員ID</th>
                     <th>名稱</th>
                     <th>Email</th>
+                    <th>創建時間</th>
+                    <th>狀態</th>
                     <th>操作</th>
                   </tr>
                 </thead>
@@ -162,12 +168,21 @@ const handleSearch = () => {
                     <td>{{ user.id }}</td>
                     <td>{{ user.username }}</td>
                     <td>{{ user.email }}</td>
+                    <td>{{ new Date(user.createdat).toLocaleString() }}</td>
+                    <td>{{ user.isdeleted ? '已刪除' : '正常' }}</td>
                     <td>
-                      <argon-button color="danger" size="sm" @click="deleteUser(user.id)">刪除</argon-button>
+                      <argon-button 
+                        :color="user.isdeleted ? 'success' : 'danger'" 
+                        size="sm" 
+                        @click="toggleDeleteUser(user.id, user.isdeleted)"
+                      >
+                        {{ user.isdeleted ? '恢復' : '刪除' }}
+                      </argon-button>
                     </td>
                   </tr>
                 </tbody>
               </table>
+              <p v-else class="text-muted">沒有找到任何用戶。</p>
             </div>
           </div>
         </div>

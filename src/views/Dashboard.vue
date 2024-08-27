@@ -48,11 +48,12 @@ const userCount = ref(0); // 用來存儲用戶數量，使用 ref 以便能夠�
 const fetchUserCount = async () => {
   try {
     const response = await axios.get('http://localhost:8080/myapp/admin/users/count'); // 獲取用戶數量
-    userCount.value = response.data; // 將返回的用戶數量賦值給 userCount
+    userCount.value = response.data.count; // 將返回的用戶數量賦值給 userCount
   } catch (error) {
     console.error("Error fetching user count:", error);
   }
 };
+
 
 // 在組件加載時調用 fetchUserCount
 onMounted(() => {

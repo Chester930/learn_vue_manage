@@ -66,7 +66,7 @@ defineProps({
                 aria-hidden="true"
                 :class="isBlur ? 'text-dark' : 'text-white'"
               ></i>
-              個人專區
+              用戶管理
             </router-link>
           </li>
           <li class="nav-item">
@@ -76,7 +76,17 @@ defineProps({
                 aria-hidden="true"
                 :class="isBlur ? 'text-dark' : 'text-white'"
               ></i>
-              創作者專區
+              創作者管理
+            </router-link>
+          </li>
+          <li class="nav-item">
+            <router-link class="nav-link me-2" to="/course">
+              <i
+                class="fa fa-user opacity-6 me-1"
+                aria-hidden="true"
+                :class="isBlur ? 'text-dark' : 'text-white'"
+              ></i>
+              課程管理
             </router-link>
           </li>
           <li class="nav-item">

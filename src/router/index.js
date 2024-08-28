@@ -54,6 +54,11 @@ const routes = [
     component: Creator,
   },
   {
+    path: "/course",
+    name: "Course",
+    component: Creator,
+  },
+  {
     path: "/signin",
     name: "Signin",
     component: Signin,

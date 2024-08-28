@@ -97,7 +97,7 @@ const getRoute = () => {
           class="text-xs ps-4 text-uppercase font-weight-bolder opacity-6"
           :class="isRTL ? 'me-4' : 'ms-2'"
         >
-        帳戶頁面
+        管理中心
         </h6>
       </li>
 
@@ -105,10 +105,10 @@ const getRoute = () => {
         <sidenav-item
           to="/profile"
           :class="getRoute() === 'profile' ? 'active' : ''"
-          :navText="isRTL ? 'حساب تعريفي' : '個人專區'"
+          :navText="isRTL ? 'حساب تعريفي' : '用戶管理'"
         >
           <template v-slot:icon>
-            <i class="ni ni-single-02 text-dark text-sm opacity-1"></i>
+            <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
           </template>
         </sidenav-item>
       </li>
@@ -117,7 +117,19 @@ const getRoute = () => {
         <sidenav-item
           to="/Creator"
           :class="getRoute() === 'creator' ? 'active' : ''"
-          :navText="isRTL ? 'حساب تعريفي' : '創作者專區'"
+          :navText="isRTL ? 'حساب تعريفي' : '創作者管理'"
+        >
+          <template v-slot:icon>
+            <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+
+      <li class="nav-item">
+        <sidenav-item
+          to="/Course"
+          :class="getRoute() === 'course' ? 'active' : ''"
+          :navText="isRTL ? 'حساب تعريفي' : '課程管理'"
         >
           <template v-slot:icon>
             <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
@@ -127,29 +139,7 @@ const getRoute = () => {
       
       
 
-      <li class="nav-item">
-        <sidenav-item
-          to="/signin"
-          :class="getRoute() === 'signin' ? 'active' : ''"
-          :navText="isRTL ? 'تسجيل الدخول' : '登入'"
-        >
-          <template v-slot:icon>
-            <i class="ni ni-single-copy-04 text-danger text-sm opacity-10"></i>
-          </template>
-        </sidenav-item>
-      </li>
-
-      <li class="nav-item">
-        <sidenav-item
-          to="/signup"
-          :class="getRoute() === 'signup' ? 'active' : ''"
-          :navText="isRTL ? 'اشتراك' : '註冊'"
-        >
-          <template v-slot:icon>
-            <i class="ni ni-collection text-info text-sm opacity-10"></i>
-          </template>
-        </sidenav-item>
-      </li>
+      
       <li class="mt-3 nav-item">
         <h6
           v-if="isRTL"
@@ -178,6 +168,31 @@ const getRoute = () => {
           </template>
         </sidenav-item>
       </li>
+
+      <li class="nav-item">
+        <sidenav-item
+          to="/signin"
+          :class="getRoute() === 'signin' ? 'active' : ''"
+          :navText="isRTL ? 'تسجيل الدخول' : '登入'"
+        >
+          <template v-slot:icon>
+            <i class="ni ni-single-copy-04 text-danger text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+
+      <li class="nav-item">
+        <sidenav-item
+          to="/signup"
+          :class="getRoute() === 'signup' ? 'active' : ''"
+          :navText="isRTL ? 'اشتراك' : '註冊'"
+        >
+          <template v-slot:icon>
+            <i class="ni ni-collection text-info text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+      
     </ul>
   </div>
 

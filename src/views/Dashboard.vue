@@ -42,7 +42,8 @@ const sales = {
   },
 };
 
-const userCount = ref(0); // 用來存儲用戶數量，使用 ref 以便能夠響應式更新
+const userCount = ref(0);
+const creatorCount = ref(0);
 
 // 獲取用戶數量的函數
 const fetchUserCount = async () => {
@@ -54,10 +55,22 @@ const fetchUserCount = async () => {
   }
 };
 
+// 獲取創作者數量的函數
+const fetchCreatorCount = async () => {
+  try {
+    const response = await axios.get('http://localhost:8080/myapp/admin/creators/count');
+    console.log('Creator count response:', response.data); // 添加日誌
+    creatorCount.value = response.data.count;
+  } catch (error) {
+    console.error("Error fetching creator count:", error);
+  }
+};
+
 
 // 在組件加載時調用 fetchUserCount
 onMounted(() => {
   fetchUserCount();
+  fetchCreatorCount();
 });
 </script>
 
@@ -81,7 +94,7 @@ onMounted(() => {
           <div class="col-lg-3 col-md-6 col-12">
             <mini-statistics-card
               title="創作者數量"
-              value="11人"
+              :value="creatorCount ? `${creatorCount}人` : '0人'" 
               description="<span
                 class='text-sm font-weight-bolder text-success'
                 >+3%</span> since last week"

@@ -11,7 +11,7 @@ vue
             <div class="card-body">
               <div class="row mb-3">
                 <div class="col-md-6">
-                  <ArgonInput 
+                  <argon-input 
                     type="text" 
                     placeholder="輸入創作者暱稱" 
                     v-model="searchNickname"
@@ -21,18 +21,17 @@ vue
                   <select v-model="searchType" class="form-select">
                     <option value="approved">已通過審核</option>
                     <option value="unapproved">未通過審核</option>
-                    <option value="nickname">暱稱搜尋</option>
                   </select>
                 </div>
                 <div class="col-md-2">
-                  <ArgonButton 
+                  <argon-button 
                     color="primary" 
                     size="sm" 
                     @click="fetchCreators"
                     :disabled="isLoading"
                   >
                     搜尋
-                  </ArgonButton>
+                  </argon-button>
                 </div>
               </div>
               <p v-if="message" :class="{'text-success': message.includes('成功'), 'text-danger': !message.includes('成功')}">
@@ -51,31 +50,47 @@ vue
                     <td>{{ creator.id }}</td>
                     <td>{{ creator.nickname }}</td>
                     <td>
-                      <ArgonButton 
+                      <argon-button 
                         color="primary" 
                         size="sm" 
                         @click="showCreatorDetails(creator)"
                       >
                         查看詳情
-                      </ArgonButton>
-                      <ArgonButton 
+                      </argon-button>
+                      <argon-button 
                         color="warning" 
                         size="sm" 
                         @click="toggleCreatorStatus(creator.id, creator.status)"
                       >
                         {{ creator.status ? '停用' : '啟用' }}
-                      </ArgonButton>
+                      </argon-button>
                     </td>
                   </tr>
                 </tbody>
               </table>
               <p v-else class="text-muted">沒有找到任何創作者。</p>
+
+              <!-- 分頁按鈕 -->
+              <div class="pagination">
+                <argon-button 
+                  :disabled="currentPage === 0" 
+                  @click="changePage(currentPage - 1)"
+                >
+                  上一頁
+                </argon-button>
+                <span>第 {{ currentPage + 1 }} 頁 / {{ totalPages }} 頁</span>
+                <argon-button 
+                  :disabled="currentPage >= totalPages - 1" 
+                  @click="changePage(currentPage + 1)"
+                >
+                  下一頁
+                </argon-button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-
     <!-- 詳情視窗 -->
     <div v-if="showDetails" class="modal fade show" style="display: block;" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
@@ -92,34 +107,34 @@ vue
             <p><strong>學歷資格:</strong> {{ selectedCreator.eduQuali }}</p>
             <p>
               <strong>網站:</strong>
-              <button v-if="selectedCreator.website" @click="openLink(selectedCreator.website)">
+              <argon-button v-if="selectedCreator.website" @click="openLink(selectedCreator.website)">
                 打開網站
-              </button>
+              </argon-button>
             </p>
             <p>
               <strong>Facebook:</strong>
-              <button v-if="selectedCreator.fbLink" @click="openLink(selectedCreator.fbLink)">
+              <argon-button v-if="selectedCreator.fbLink" @click="openLink(selectedCreator.fbLink)">
                 打開 Facebook
-              </button>
+              </argon-button>
             </p>
             <p>
               <strong>Instagram:</strong>
-              <button v-if="selectedCreator.igLink" @click="openLink(selectedCreator.igLink)">
+              <argon-button v-if="selectedCreator.igLink" @click="openLink(selectedCreator.igLink)">
                 打開 Instagram
-              </button>
+              </argon-button>
             </p>
             <p>
               <strong>YouTube:</strong>
-              <button v-if="selectedCreator.ytLink" @click="openLink(selectedCreator.ytLink)">
+              <argon-button v-if="selectedCreator.ytLink" @click="openLink(selectedCreator.ytLink)">
                 打開 YouTube
-              </button>
+              </argon-button>
             </p>
             <p><strong>創建時間:</strong> {{ selectedCreator.createdAt }}</p>
             <p><strong>用戶名:</strong> {{ selectedCreator.user.username }}</p>
             <p><strong>用戶郵件:</strong> {{ selectedCreator.user.email }}</p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="showDetails = false">關閉</button>
+            <argon-button type="button" color="secondary" @click="showDetails = false">關閉</argon-button>
           </div>
         </div>
       </div>
@@ -137,28 +152,37 @@ const creators = ref([]);
 const message = ref('');
 const isLoading = ref(false);
 const searchNickname = ref('');
-const searchType = ref('approved'); // 預設搜尋類型為已通過審核的創作者
-
+const searchType = ref('approved'); // 預設搜尋類型
 const showDetails = ref(false); // 控制是否顯示詳情視窗
 const selectedCreator = ref(null); // 儲存選中的創作者
+const currentPage = ref(0); // 當前頁碼
+const totalPages = ref(0); // 總頁數
 
 const fetchCreators = async () => {
   isLoading.value = true;
   creators.value = []; // 清空搜索结果
   selectedCreator.value = null; // 重置选中的創作者
-
   try {
     let response;
-    if (searchType.value === 'approved') {
-      response = await axios.get('http://localhost:8080/myapp/admin/creators/approved');
-    } else if (searchType.value === 'unapproved') {
-      response = await axios.get('http://localhost:8080/myapp/admin/creators/unapproved');
+    const pageSize = 10; // 每頁顯示的創作者數量
+    if (searchNickname.value.trim() === '') {
+      // 根據選擇的狀態搜尋創作者
+      if (searchType.value === 'approved') {
+        response = await axios.get(`http://localhost:8080/myapp/admin/creators/approved?page=${currentPage.value}&size=${pageSize}`);
+      } else {
+        response = await axios.get(`http://localhost:8080/myapp/admin/creators/unapproved?page=${currentPage.value}&size=${pageSize}`);
+      }
     } else {
-      response = await axios.get(`http://localhost:8080/myapp/admin/creators/search?nickname=${searchNickname.value}`);
+      // 根據暱稱模糊搜尋創作者
+      if (searchType.value === 'approved') {
+        response = await axios.get(`http://localhost:8080/myapp/admin/creators/approved/search?nickname=${searchNickname.value}&page=${currentPage.value}&size=${pageSize}`);
+      } else {
+        response = await axios.get(`http://localhost:8080/myapp/admin/creators/unapproved/search?nickname=${searchNickname.value}&page=${currentPage.value}&size=${pageSize}`);
+      }
     }
-    
     if (response.data.success) {
       creators.value = response.data.creators || response.data; // 根據返回的數據結構設置創作者列表
+      totalPages.value = response.data.totalPages; // 更新總頁數
       message.value = '';
     } else {
       message.value = response.data.message;
@@ -168,6 +192,13 @@ const fetchCreators = async () => {
     message.value = '獲取創作者列表時出錯';
   } finally {
     isLoading.value = false;
+  }
+};
+
+const changePage = (newPage) => {
+  if (newPage >= 0 && newPage < totalPages.value) {
+    currentPage.value = newPage;
+    fetchCreators(); // 重新獲取創作者列表
   }
 };
 
@@ -208,4 +239,9 @@ onMounted(() => {
 
 <style scoped>
 /* 這裡可以添加 CSS 樣式以美化你的視窗 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
 </style>

@@ -136,6 +136,18 @@ const getRoute = () => {
           </template>
         </sidenav-item>
       </li>
+
+      <li class="nav-item">
+        <sidenav-item
+          to="/Transaction"
+          :class="getRoute() === 'transaction' ? 'active' : ''"
+          :navText="isRTL ? 'حساب تعريفي' : '交易管理'"
+        >
+          <template v-slot:icon>
+            <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
       
       
 

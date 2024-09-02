@@ -10,6 +10,8 @@ import Tables from "../views/Tables.vue";
 import VirtualReality from "../views/VirtualReality.vue";
 import Login from "../views/login.vue";
 import Creator from "../views/Creator.vue";
+import Course from "../views/Course.vue";
+import Transaction from "../views/Transaction.vue";
 
 
 const routes = [
@@ -56,7 +58,12 @@ const routes = [
   {
     path: "/course",
     name: "Course",
-    component: Creator,
+    component: Course,
+  },
+  {
+    path: "/transaction",
+    name: "Transaction",
+    component: Transaction,
   },
   {
     path: "/signin",

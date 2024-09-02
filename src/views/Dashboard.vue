@@ -81,25 +81,32 @@ onMounted(() => {
         <div class="row">
           <div class="col-lg-3 col-md-6 col-12">
             <mini-statistics-card
-  title="用戶數量"
-  :value="userCount ? `${userCount}人` : '0人'" 
-  description="<span class='text-sm font-weight-bolder text-success'>+55%</span> since yesterday"
-  :icon="{
-    component: 'ni ni-money-coins',
-    background: 'bg-gradient-primary',
-    shape: 'rounded-circle',
-  }"
-/>
+              title="用戶數量"
+              :value="userCount ? `${userCount}人` : '0人'"
+              description="
+                <!-- <span class='text-sm font-weight-bolder text-success'>+55%</span> since yesterday -->
+                <a href='/profile' class='btn btn-primary mt-3 d-block'>查看詳情</a>
+              "
+              :icon="{
+                component: 'fa fa-user-o',
+                background: 'bg-gradient-primary',
+                shape: 'rounded-circle',
+              }"
+            />
           </div>
+          
+          
           <div class="col-lg-3 col-md-6 col-12">
             <mini-statistics-card
               title="創作者數量"
               :value="creatorCount ? `${creatorCount}人` : '0人'" 
-              description="<span
-                class='text-sm font-weight-bolder text-success'
-                >+3%</span> since last week"
+              description="
+              <!-- <span class='text-sm font-weight-bolder text-success'
+                >+3%</span> since last week -->
+                <a href='/creator' class='btn btn-danger mt-3 d-block'>查看詳情</a>"
+                
               :icon="{
-                component: 'ni ni-world',
+                component: 'fa fa-address-card-o',
                 background: 'bg-gradient-danger',
                 shape: 'rounded-circle',
               }"
@@ -109,11 +116,13 @@ onMounted(() => {
             <mini-statistics-card
               title="課程數量"
               value="37堂"
-              description="<span
+              description="  
+              <!-- <span
                 class='text-sm font-weight-bolder text-danger'
-                >-2%</span> since last quarter"
+                >-2%</span> since last quarter -->
+                                <a href='/course' class='btn btn-success mt-3 d-block'>查看詳情</a>"
               :icon="{
-                component: 'ni ni-paper-diploma',
+                component: 'fa fa-university',
                 background: 'bg-gradient-success',
                 shape: 'rounded-circle',
               }"
@@ -123,11 +132,13 @@ onMounted(() => {
             <mini-statistics-card
               title="今日交易金額"
               value="$103,430"
-              description="<span
+              description="
+              <!-- <span
                 class='text-sm font-weight-bolder text-success'
-                >+5%</span> than last month"
+                >+5%</span> than last month -->
+                <a href='/transaction' class='btn btn-warning mt-3 d-block'>查看詳情</a>"
               :icon="{
-                component: 'ni ni-cart',
+                component: 'ni ni-money-coins',
                 background: 'bg-gradient-warning',
                 shape: 'rounded-circle',
               }"

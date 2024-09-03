@@ -15,7 +15,7 @@
                     <option value="description">描述搜尋</option>
                     <option value="status-true">狀態: 啟用</option>
                     <option value="status-false">狀態: 停用</option>
-                    <option value="category">類別 </option>
+                    <option value="category">類別</option>
                     <option value="creator">創建者 ID</option>
                     <option value="price-asc">價格: 升序</option>
                     <option value="price-desc">價格: 降序</option>
@@ -94,7 +94,7 @@
                     <td>{{ course.status ? '啟用' : '停用' }}</td>
                     <td>
                       <ArgonButton 
-                        color="warning" 
+                        :color="course.status ? 'danger' : 'success'" 
                         size="sm" 
                         @click="toggleCourseStatus(course.id)"
                       >

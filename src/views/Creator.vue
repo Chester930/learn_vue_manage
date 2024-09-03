@@ -58,7 +58,7 @@ vue
                         查看詳情
                       </argon-button>
                       <argon-button 
-                        color="warning" 
+                        :color="creator.status ? 'danger' : 'success'" 
                         size="sm" 
                         @click="toggleCreatorStatus(creator.id, creator.status)"
                       >

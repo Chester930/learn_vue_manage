@@ -44,6 +44,7 @@ const sales = {
 
 const userCount = ref(0);
 const creatorCount = ref(0);
+const courseCount = ref(0); 
 
 // 獲取用戶數量的函數
 const fetchUserCount = async () => {
@@ -51,7 +52,7 @@ const fetchUserCount = async () => {
     const response = await axios.get('http://localhost:8080/myapp/admin/users/count'); // 獲取用戶數量
     userCount.value = response.data.count; // 將返回的用戶數量賦值給 userCount
   } catch (error) {
-    console.error("Error fetching user count:", error);
+    console.error("錯誤", error);
   }
 };
 
@@ -62,15 +63,25 @@ const fetchCreatorCount = async () => {
     console.log('Creator count response:', response.data); // 添加日誌
     creatorCount.value = response.data.count;
   } catch (error) {
-    console.error("Error fetching creator count:", error);
+    console.error("錯誤", error);
   }
 };
 
+// 獲取課程數量的函數
+const fetchCoursesCount = async () => {
+  try {
+    const response = await axios.get('http://localhost:8080/myapp/admin/courses/count'); // 獲取課程數量
+    courseCount.value = response.data.count; // 修正為 courseCount 而不是 coursesCount
+  } catch (error) {
+    console.error("錯誤", error);
+  }
+};
 
 // 在組件加載時調用 fetchUserCount
 onMounted(() => {
   fetchUserCount();
   fetchCreatorCount();
+  fetchCoursesCount(); // 添加此行來調用 fetchCoursesCount
 });
 </script>
 
@@ -82,7 +93,7 @@ onMounted(() => {
           <div class="col-lg-3 col-md-6 col-12">
             <mini-statistics-card
               title="用戶數量"
-              :value="userCount ? `${userCount}人` : '0人'"
+              :value="`${userCount}人`"
               description="
                 <!-- <span class='text-sm font-weight-bolder text-success'>+55%</span> since yesterday -->
                 <a href='/profile' class='btn btn-primary mt-3 d-block'>查看詳情</a>
@@ -95,16 +106,14 @@ onMounted(() => {
             />
           </div>
           
-          
           <div class="col-lg-3 col-md-6 col-12">
             <mini-statistics-card
               title="創作者數量"
-              :value="creatorCount ? `${creatorCount}人` : '0人'" 
+              :value="`${creatorCount}人`"
               description="
               <!-- <span class='text-sm font-weight-bolder text-success'
                 >+3%</span> since last week -->
                 <a href='/creator' class='btn btn-danger mt-3 d-block'>查看詳情</a>"
-                
               :icon="{
                 component: 'fa fa-address-card-o',
                 background: 'bg-gradient-danger',
@@ -112,15 +121,15 @@ onMounted(() => {
               }"
             />
           </div>
+
           <div class="col-lg-3 col-md-6 col-12">
             <mini-statistics-card
               title="課程數量"
-              value="37堂"
-              description="  
-              <!-- <span
-                class='text-sm font-weight-bolder text-danger'
+              :value="`${courseCount}堂`"
+              description="
+              <!-- <span class='text-sm font-weight-bolder text-danger'
                 >-2%</span> since last quarter -->
-                                <a href='/course' class='btn btn-success mt-3 d-block'>查看詳情</a>"
+                <a href='/course' class='btn btn-success mt-3 d-block'>查看詳情</a>"
               :icon="{
                 component: 'fa fa-university',
                 background: 'bg-gradient-success',
@@ -128,6 +137,7 @@ onMounted(() => {
               }"
             />
           </div>
+          
           <div class="col-lg-3 col-md-6 col-12">
             <mini-statistics-card
               title="今日交易金額"
@@ -153,7 +163,7 @@ onMounted(() => {
                 id="chart-line"
                 title="Sales Overview"
                 description="<i class='fa fa-arrow-up text-success'></i>
-      <span class='font-weight-bold'>4% more</span> in 2021"
+                  <span class='font-weight-bold'>4% more</span> in 2021"
                 :chart="{
                   labels: [
                     'Apr',

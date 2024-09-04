@@ -10,6 +10,13 @@ vue
             </div>
             <div class="card-body">
               <div class="row mb-3">
+                <div class="col-md-4">
+                  <argon-input 
+                    type="text" 
+                    placeholder="輸入創作者 ID" 
+                    v-model="searchId"
+                  />
+                </div>
                 <div class="col-md-6">
                   <argon-input 
                     type="text" 
@@ -148,6 +155,7 @@ import axios from 'axios';
 import ArgonInput from "@/components/ArgonInput.vue";
 import ArgonButton from "@/components/ArgonButton.vue";
 
+const searchId = ref(''); // 新增變數以儲存輸入的 ID
 const creators = ref([]);
 const message = ref('');
 const isLoading = ref(false);
@@ -165,27 +173,32 @@ const fetchCreators = async () => {
   try {
     let response;
     const pageSize = 10; // 每頁顯示的創作者數量
-    if (searchNickname.value.trim() === '') {
+    if (searchId.value.trim() !== '' && !isNaN(searchId.value)) {
+      // 根據 ID 搜尋創作者
+      response = await axios.get(`http://localhost:8080/myapp/admin/creators/${searchId.value}`);
+      if (response.data.success) {
+        creators.value = [response.data.creator]; // 只返回一個創作者
+        totalPages.value = 1; // 只有一頁
+        message.value = '';
+      } else {
+        message.value = response.data.message;
+      }
+    } else {
       // 根據選擇的狀態搜尋創作者
-      if (searchType.value === 'approved') {
-        response = await axios.get(`http://localhost:8080/myapp/admin/creators/approved?page=${currentPage.value}&size=${pageSize}`);
+      if (searchNickname.value.trim() === '') {
+        if (searchType.value === 'approved') {
+          response = await axios.get(`http://localhost:8080/myapp/admin/creators/approved?page=${currentPage.value}&size=${pageSize}`);
+        } else {
+          response = await axios.get(`http://localhost:8080/myapp/admin/creators/unapproved?page=${currentPage.value}&size=${pageSize}`);
+        }
       } else {
-        response = await axios.get(`http://localhost:8080/myapp/admin/creators/unapproved?page=${currentPage.value}&size=${pageSize}`);
+        // 根據暱稱模糊搜尋創作者
+        if (searchType.value === 'approved') {
+          response = await axios.get(`http://localhost:8080/myapp/admin/creators/approved/search?nickname=${searchNickname.value}&page=${currentPage.value}&size=${pageSize}`);
+        } else {
+          response = await axios.get(`http://localhost:8080/myapp/admin/creators/unapproved/search?nickname=${searchNickname.value}&page=${currentPage.value}&size=${pageSize}`);
+        }
       }
-    } else {
-      // 根據暱稱模糊搜尋創作者
-      if (searchType.value === 'approved') {
-        response = await axios.get(`http://localhost:8080/myapp/admin/creators/approved/search?nickname=${searchNickname.value}&page=${currentPage.value}&size=${pageSize}`);
-      } else {
-        response = await axios.get(`http://localhost:8080/myapp/admin/creators/unapproved/search?nickname=${searchNickname.value}&page=${currentPage.value}&size=${pageSize}`);
-      }
-    }
-    if (response.data.success) {
-      creators.value = response.data.creators || response.data; // 根據返回的數據結構設置創作者列表
-      totalPages.value = response.data.totalPages; // 更新總頁數
-      message.value = '';
-    } else {
-      message.value = response.data.message;
     }
   } catch (error) {
     console.error('Error fetching creators:', error);

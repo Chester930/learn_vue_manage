@@ -120,7 +120,7 @@
 
     <!-- 詳情視窗 -->
     <div v-if="showDetails" class="modal fade show" style="display: block;" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg" role="document"> 
+      <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">課程詳情</h5>
@@ -135,7 +135,43 @@
             <p><strong>創作者名稱:</strong> {{ selectedCourse.creator.nickname }}</p>
             <p><strong>課程概述:</strong> {{ selectedCourse.overview }}</p>
             <p><strong>課程描述:</strong> {{ selectedCourse.description }}</p>
-            <!-- ... 其他課程資訊 ... -->
+            <p><strong>影片數量:</strong> {{ videoDetails.length }}</p>
+
+            <!-- 影片詳情表格 -->
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>影片名稱</th>
+                  <th>影片預覽</th>
+                  <th>影片描述</th>
+                  <th>影片時長</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="video in videoDetails" :key="video.id">
+                  <td>
+                    <a :href="video.url" target="_blank">{{ video.title }}</a>
+                  </td>
+                  <td>
+                    <div class="video-preview">
+                      <video 
+                        :src="video.url"
+                        controls
+                        preload="metadata"
+                        width="200"
+                        :ref="getVideoRef" 
+                        @mouseover="playPreview"
+                        @mouseout="stopPreview"
+                      >
+                        您的瀏覽器不支持 HTML5 視頻。
+                      </video>
+                    </div>
+                  </td>
+                  <td>{{ video.description }}</td>
+                  <td>{{ formatDuration(video.duration) }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" @click="showDetails = false">關閉</button>
@@ -146,103 +182,209 @@
   </main>
 </template>
 
-<script setup>
-import { ref, onMounted, computed } from 'vue';
+<script>
+import { ref, onMounted, computed, nextTick  } from 'vue';
 import axios from 'axios';
 import ArgonInput from "@/components/ArgonInput.vue";
 import ArgonButton from "@/components/ArgonButton.vue";
 
-const courses = ref([]);
-const message = ref('');
-const isLoading = ref(false);
-const searchType = ref('title'); // 預設搜尋類型為標題搜尋
-const searchValue = ref('');
-const startDate = ref('');
-const endDate = ref('');
+export default {
+  name: 'CourseManagement',
+  components: {
+    ArgonInput,
+    ArgonButton
+  },
+  setup() {
+    const courses = ref([]);
+    const message = ref('');
+    const isLoading = ref(false);
+    const searchType = ref('title');
+    const searchValue = ref('');
+    const startDate = ref('');
+    const endDate = ref('');
 
-const showDetails = ref(false); 
-const selectedCourse = ref(null); 
+    const showDetails = ref(false);
+    const selectedCourse = ref(null);
+    const videoDetails = ref([]);
+    const videoPreview = ref(null); 
+    const videoRefs = ref({}); 
 
-const apiEndpoint = computed(() => {
-  switch (searchType.value) {
-    case 'title':
-      return `http://localhost:8080/myapp/admin/courses/search/title?title=${searchValue.value}`;
-    case 'description':
-      return `http://localhost:8080/myapp/admin/courses/search/description?description=${searchValue.value}`;
-    case 'status-true':
-      return `http://localhost:8080/myapp/admin/courses/status/true`;
-    case 'status-false':
-      return `http://localhost:8080/myapp/admin/courses/status/false`;
-    case 'category':
-      return `http://localhost:8080/myapp/admin/courses/category/${searchValue.value}`;
-    case 'creator':
-      return `http://localhost:8080/myapp/admin/courses/creator/${searchValue.value}`;
-    case 'price-asc':
-      return 'http://localhost:8080/myapp/admin/courses/sort/price/asc';
-    case 'price-desc':
-      return 'http://localhost:8080/myapp/admin/courses/sort/price/desc';
-    case 'createdAt':
-      return `http://localhost:8080/myapp/admin/courses/search/createdAt?startDate=${startDate.value}&endDate=${endDate.value}`;
-    default:
-      return 'http://localhost:8080/myapp/admin/courses';
-  }
-});
+    const apiEndpoint = computed(() => {
+      switch (searchType.value) {
+        case 'title':
+          return `http://localhost:8080/myapp/admin/courses/search/title?title=${searchValue.value}`;
+        case 'description':
+          return `http://localhost:8080/myapp/admin/courses/search/description?description=${searchValue.value}`;
+        case 'status-true':
+          return `http://localhost:8080/myapp/admin/courses/status/true`;
+        case 'status-false':
+          return `http://localhost:8080/myapp/admin/courses/status/false`;
+        case 'category':
+          return `http://localhost:8080/myapp/admin/courses/category/${searchValue.value}`;
+        case 'creator':
+          return `http://localhost:8080/myapp/admin/courses/creator/${searchValue.value}`;
+        case 'price-asc':
+          return 'http://localhost:8080/myapp/admin/courses/sort/price/asc';
+        case 'price-desc':
+          return 'http://localhost:8080/myapp/admin/courses/sort/price/desc';
+        case 'createdAt':
+          return `http://localhost:8080/myapp/admin/courses/search/createdAt?startDate=${startDate.value}&endDate=${endDate.value}`;
+        default:
+          return 'http://localhost:8080/myapp/admin/courses';
+      }
+    });
 
-const fetchCourses = async () => {
-  isLoading.value = true;
-  courses.value = [];
-  selectedCourse.value = null;
+    const fetchCourses = async () => {
+      isLoading.value = true;
+      courses.value = [];
+      selectedCourse.value = null;
 
-  try {
-    const response = await axios.get(apiEndpoint.value);
-    if (response.data) {
-        courses.value = response.data.content;
-        message.value = '';
-    } else {
+      try {
+        const response = await axios.get(apiEndpoint.value);
+        if (response.data) {
+          courses.value = response.data.content;
+          message.value = '';
+        } else {
+          message.value = '獲取課程列表時出錯';
+        }
+      } catch (error) {
+        console.error('Error fetching courses:', error);
         message.value = '獲取課程列表時出錯';
-    }
-  } catch (error) {
-    console.error('Error fetching courses:', error);
-    message.value = '獲取課程列表時出錯';
-  } finally {
-    isLoading.value = false;
+      } finally {
+        isLoading.value = false;
+      }
+    };
+
+    const formatDuration = (seconds) => {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const remainingSeconds = seconds % 60;
+
+      return [hours, minutes, remainingSeconds]
+        .map(v => v < 10 ? "0" + v : v)
+        .filter((v, i) => v !== "00" || i > 0)
+        .join(":");
+    };
+    const getVideoRef = (el) => {
+      if (el) {
+        videoRefs.value[el.id] = el; // Assign the ref using a unique ID
+      }
+    };
+
+    const playPreview = (event) => {
+      const videoId = event.target.id; // Get the ID of the video
+      nextTick().then(() => {
+        if (videoRefs.value[videoId]) {
+          videoRefs.value[videoId].play().then(() => {
+            console.log("Video playback started");
+          }).catch(error => {
+            console.error("Video playback interrupted:", error);
+          });
+        }
+      });
+    };
+
+    const loadVideo = (videoLink) => {
+      if (videoPreview.value) { 
+        videoPreview.value.src = videoLink;
+      }
+    };
+
+    const stopPreview = (event) => {
+      const videoId = event.target.id;
+      if (videoRefs.value[videoId]) {
+        videoRefs.value[videoId].pause();
+        videoRefs.value[videoId].currentTime = 0;
+      }
+    };
+    const toggleCourseStatus = async (id) => {
+      isLoading.value = true;
+      try {
+        const response = await axios.put(`http://localhost:8080/myapp/admin/courses/${id}/status`);
+
+        if (response.data.success) {
+          message.value = '課程狀態已更新';
+          await fetchCourses(); 
+        } else {
+          message.value = '更新課程狀態失敗';
+        }
+      } catch (error) {
+        console.error('Error toggling course status:', error);
+        message.value = '更改課程狀態時出錯';
+      } finally {
+        isLoading.value = false;
+      }
+    };
+
+    const formatDate = (dateString) => {
+      const date = new Date(dateString);
+      return date.toLocaleDateString();
+    };
+
+    const fetchVideoDetails = async (courseId) => {
+      try {
+        const response = await axios.get(`http://localhost:8080/myapp/admin/courses/${courseId}/videos`);
+        if (response.data) {
+          videoDetails.value = response.data;
+        } else {
+          console.error('Failed to fetch video details');
+        }
+      } catch (error) {
+        console.error('Error fetching video details:', error);
+      }
+    };
+
+    const showCourseDetails = async (course) => {
+      selectedCourse.value = course;
+      showDetails.value = true;
+      await fetchVideoDetails(course.id);
+    };
+
+    onMounted(() => {
+      fetchCourses();
+    });
+
+    return {
+      courses,
+      message,
+      isLoading,
+      searchType,
+      searchValue,
+      startDate,
+      endDate,
+      showDetails,
+      selectedCourse,
+      videoDetails,
+      fetchCourses,
+      toggleCourseStatus,
+      formatDate,
+      showCourseDetails,
+      formatDuration,
+      playPreview,
+      stopPreview,
+      getVideoRef,
+      loadVideo,
+      videoPreview,
+    };
   }
 };
-
-const toggleCourseStatus = async (id) => {
-  isLoading.value = true;
-  try {
-    const response = await axios.put(`http://localhost:8080/myapp/admin/courses/${id}/status`);
-
-    if (response.data.success) {
-      message.value = '課程狀態已更新';
-      await fetchCourses(); // 重新獲取課程列表以顯示更新後的狀態
-    } else {
-      message.value = '更新課程狀態失敗';
-    }
-  } catch (error) {
-    console.error('Error toggling course status:', error);
-    message.value = '更改課程狀態時出錯';
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString(); 
-};
-
-const showCourseDetails = (course) => {
-  selectedCourse.value = course;
-  showDetails.value = true;
-};
-
-onMounted(() => {
-  fetchCourses(); 
-});
 </script>
 
 <style scoped>
-/* 這裡可以添加 CSS 樣式以美化你的視窗 */
+
+.modal-dialog {
+  max-width: 50%;
+}
+.video-preview {
+  width: 200px;
+  height: 112px; /* 16:9 比例 */
+  overflow: hidden;
+}
+
+.video-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 </style>

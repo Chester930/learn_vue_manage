@@ -112,6 +112,36 @@
                 </tbody>
               </table>
               <p v-else class="text-muted">沒有找到任何課程。</p>
+              <!-- 分頁控制 -->
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <div>
+                  每頁顯示：
+                  <select v-model="pageSize" @change="changePageSize">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                  </select>
+                </div>
+                <div>
+                  <ArgonButton 
+                    color="primary" 
+                    size="sm" 
+                    @click="previousPage" 
+                    :disabled="currentPage === 0"
+                  >
+                    上一頁
+                  </ArgonButton>
+                  <span class="mx-2">第 {{ currentPage + 1 }} 頁</span>
+                  <ArgonButton 
+                    color="primary" 
+                    size="sm" 
+                    @click="nextPage" 
+                    :disabled="!hasNextPage"
+                  >
+                    下一頁
+                  </ArgonButton>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -209,6 +239,11 @@ export default {
     const videoPreview = ref(null); 
     const videoRefs = ref({}); 
 
+    const currentPage = ref(0);
+    const pageSize = ref(10);
+    const totalPages = ref(0);
+    const hasNextPage = ref(false);
+
     const apiEndpoint = computed(() => {
       switch (searchType.value) {
         case 'title':
@@ -240,9 +275,16 @@ export default {
       selectedCourse.value = null;
 
       try {
-        const response = await axios.get(apiEndpoint.value);
+        const response = await axios.get(apiEndpoint.value, {
+          params: {
+            page: currentPage.value,
+            size: pageSize.value
+          }
+        });
         if (response.data) {
           courses.value = response.data.content;
+          totalPages.value = response.data.totalPages;
+          hasNextPage.value = !response.data.last;
           message.value = '';
         } else {
           message.value = '獲取課程列表時出錯';
@@ -340,6 +382,25 @@ export default {
       await fetchVideoDetails(course.id);
     };
 
+    const changePageSize = () => {
+      currentPage.value = 0;
+      fetchCourses();
+    };
+
+    const previousPage = () => {
+      if (currentPage.value > 0) {
+        currentPage.value--;
+        fetchCourses();
+      }
+    };
+
+    const nextPage = () => {
+      if (hasNextPage.value) {
+        currentPage.value++;
+        fetchCourses();
+      }
+    };
+
     onMounted(() => {
       fetchCourses();
     });
@@ -365,6 +426,13 @@ export default {
       getVideoRef,
       loadVideo,
       videoPreview,
+      currentPage,
+      pageSize,
+      totalPages,
+      hasNextPage,
+      changePageSize,
+      previousPage,
+      nextPage
     };
   }
 };

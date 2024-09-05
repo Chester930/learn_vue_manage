@@ -10,34 +10,41 @@ vue
             </div>
             <div class="card-body">
               <div class="row mb-3">
-                <div class="col-md-4">
+                <!-- ID 搜尋 -->
+                <div class="col-md-6 mb-2">
                   <argon-input 
                     type="text" 
                     placeholder="輸入創作者 ID" 
                     v-model="searchId"
                   />
+                  <argon-button 
+                    color="primary" 
+                    size="sm" 
+                    @click="fetchCreatorById"
+                    :disabled="isLoading"
+                  >
+                    搜尋 ID
+                  </argon-button>
                 </div>
-                <div class="col-md-6">
+
+                <!-- 暱稱搜尋 -->
+                <div class="col-md-6 mb-2">
                   <argon-input 
                     type="text" 
                     placeholder="輸入創作者暱稱" 
                     v-model="searchNickname"
                   />
-                </div>
-                <div class="col-md-2">
-                  <select v-model="searchType" class="form-select">
+                  <select v-model="searchType" class="form-select d-inline-block" style="width: auto; margin-right: 10px;">
                     <option value="approved">已通過審核</option>
                     <option value="unapproved">未通過審核</option>
                   </select>
-                </div>
-                <div class="col-md-2">
                   <argon-button 
                     color="primary" 
                     size="sm" 
-                    @click="fetchCreators"
+                    @click="fetchCreatorsByNickname"
                     :disabled="isLoading"
                   >
-                    搜尋
+                    搜尋 暱稱
                   </argon-button>
                 </div>
               </div>
@@ -76,22 +83,35 @@ vue
                 </tbody>
               </table>
               <p v-else class="text-muted">沒有找到任何創作者。</p>
-
-              <!-- 分頁按鈕 -->
-              <div class="pagination">
-                <argon-button 
-                  :disabled="currentPage === 0" 
-                  @click="changePage(currentPage - 1)"
-                >
-                  上一頁
-                </argon-button>
-                <span>第 {{ currentPage + 1 }} 頁 / {{ totalPages }} 頁</span>
-                <argon-button 
-                  :disabled="currentPage >= totalPages - 1" 
-                  @click="changePage(currentPage + 1)"
-                >
-                  下一頁
-                </argon-button>
+              <!-- 分頁控制 -->
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <div>
+                  每頁顯示：
+                  <select v-model="pageSize" @change="changePageSize">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                  </select>
+                </div>
+                <div>
+                  <argon-button 
+                    color="primary" 
+                    size="sm" 
+                    @click="previousPage" 
+                    :disabled="currentPage === 0"
+                  >
+                    上一頁
+                  </argon-button>
+                  <span class="mx-2">第 {{ currentPage + 1 }} 頁</span>
+                  <argon-button 
+                    color="primary" 
+                    size="sm" 
+                    @click="nextPage" 
+                    :disabled="!hasNextPage"
+                  >
+                    下一頁
+                  </argon-button>
+                </div>
               </div>
             </div>
           </div>
@@ -155,76 +175,79 @@ import axios from 'axios';
 import ArgonInput from "@/components/ArgonInput.vue";
 import ArgonButton from "@/components/ArgonButton.vue";
 
-const searchId = ref(''); // 新增變數以儲存輸入的 ID
+const searchId = ref(''); // 搜尋 ID 的變數
+const searchNickname = ref(''); // 搜尋暱稱的變數
+const searchType = ref('approved'); // 預設搜尋類型
 const creators = ref([]);
 const message = ref('');
 const isLoading = ref(false);
-const searchNickname = ref('');
-const searchType = ref('approved'); // 預設搜尋類型
 const showDetails = ref(false); // 控制是否顯示詳情視窗
 const selectedCreator = ref(null); // 儲存選中的創作者
 const currentPage = ref(0); // 當前頁碼
 const totalPages = ref(0); // 總頁數
+const pageSize = ref(10); // 每頁顯示的創作者數量
+const hasNextPage = ref(false); // 是否有下一頁
 
-const fetchCreators = async () => {
+const fetchCreatorById = async () => {
+  isLoading.value = true;
+  creators.value = []; // 清空搜索结果
+  selectedCreator.value = null; // 重置选中的創作者
+  try {
+    const response = await axios.get(`http://localhost:8080/myapp/admin/creators/${searchId.value}`);
+    if (response.data.success) {
+      creators.value = [response.data.creator]; // 只返回一個創作者
+      totalPages.value = 1; // 只有一頁
+      message.value = '';
+    } else {
+      message.value = response.data.message;
+    }
+  } catch (error) {
+    console.error('Error fetching creator by ID:', error);
+    message.value = '獲取創作者時出錯';
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const fetchCreatorsByNickname = async () => {
   isLoading.value = true;
   creators.value = []; // 清空搜索结果
   selectedCreator.value = null; // 重置选中的創作者
   try {
     let response;
-    const pageSize = 10; // 每頁顯示的創作者數量
-    if (searchId.value.trim() !== '' && !isNaN(searchId.value)) {
-      // 根據 ID 搜尋創作者
-      response = await axios.get(`http://localhost:8080/myapp/admin/creators/${searchId.value}`);
-      if (response.data.success) {
-        creators.value = [response.data.creator]; // 只返回一個創作者
-        totalPages.value = 1; // 只有一頁
-        message.value = '';
-      } else {
-        message.value = response.data.message;
-      }
+    if (searchNickname.value.trim() === '') {
+      // 如果暱稱為空，根據狀態搜尋創作者
+      response = await axios.get(`http://localhost:8080/myapp/admin/creators/${searchType.value}?page=${currentPage.value}&size=${pageSize.value}`);
     } else {
-      // 根據選擇的狀態搜尋創作者
-      if (searchNickname.value.trim() === '') {
-        if (searchType.value === 'approved') {
-          response = await axios.get(`http://localhost:8080/myapp/admin/creators/approved?page=${currentPage.value}&size=${pageSize}`);
-        } else {
-          response = await axios.get(`http://localhost:8080/myapp/admin/creators/unapproved?page=${currentPage.value}&size=${pageSize}`);
-        }
-      } else {
-        // 根據暱稱模糊搜尋創作者
-        if (searchType.value === 'approved') {
-          response = await axios.get(`http://localhost:8080/myapp/admin/creators/approved/search?nickname=${searchNickname.value}&page=${currentPage.value}&size=${pageSize}`);
-        } else {
-          response = await axios.get(`http://localhost:8080/myapp/admin/creators/unapproved/search?nickname=${searchNickname.value}&page=${currentPage.value}&size=${pageSize}`);
-        }
-      }
+      // 根據暱稱模糊搜尋創作者
+      response = await axios.get(`http://localhost:8080/myapp/admin/creators/${searchType.value}/search?nickname=${searchNickname.value}&page=${currentPage.value}&size=${pageSize.value}`);
+    }
+
+    if (response.data.success) {
+      creators.value = response.data.creators; // 更新創作者列表
+      totalPages.value = Math.ceil(response.data.total / pageSize.value); // 計算總頁數
+      hasNextPage.value = currentPage.value < totalPages.value - 1; // 是否有下一頁
+      message.value = '';
+    } else {
+      message.value = response.data.message;
     }
   } catch (error) {
-    console.error('Error fetching creators:', error);
+    console.error('Error fetching creators by nickname:', error);
     message.value = '獲取創作者列表時出錯';
   } finally {
     isLoading.value = false;
   }
 };
 
-const changePage = (newPage) => {
-  if (newPage >= 0 && newPage < totalPages.value) {
-    currentPage.value = newPage;
-    fetchCreators(); // 重新獲取創作者列表
-  }
-};
-
 const toggleCreatorStatus = async (id) => {
   isLoading.value = true;
   try {
-    // 強制將狀態設置為已通過審核 (true)
     const response = await axios.put(`http://localhost:8080/myapp/admin/creators/${id}/status`, null, {
       params: { status: true }
     });
     if (response.data.success) {
       message.value = response.data.message;
-      await fetchCreators(); // 更新創作者列表
+      await fetchCreatorsByNickname(); // 更新創作者列表
     } else {
       message.value = response.data.message;
     }
@@ -245,8 +268,27 @@ const openLink = (url) => {
   window.open(url, '_blank');
 };
 
+const changePageSize = () => {
+  currentPage.value = 0;
+  fetchCreatorsByNickname();
+};
+
+const previousPage = () => {
+  if (currentPage.value > 0) {
+    currentPage.value--;
+    fetchCreatorsByNickname();
+  }
+};
+
+const nextPage = () => {
+  if (hasNextPage.value) {
+    currentPage.value++;
+    fetchCreatorsByNickname();
+  }
+};
+
 onMounted(() => {
-  fetchCreators(); // 初始化時獲取創作者列表
+  fetchCreatorsByNickname(); // 初始化時獲取創作者列表
 });
 </script>
 

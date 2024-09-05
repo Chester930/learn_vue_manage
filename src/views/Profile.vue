@@ -3,8 +3,9 @@ import ArgonInput from "@/components/ArgonInput.vue";
 import ArgonButton from "@/components/ArgonButton.vue";
 import { ref, computed, watch } from 'vue';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
-// 通用状态
+// 通用狀態
 const users = ref([]);
 const totalUsers = ref(0);
 const message = ref('');
@@ -12,16 +13,17 @@ const isLoading = ref(false);
 const currentPage = ref(0);
 const pageSize = ref(10);
 const totalPages = ref(0);
+const hasNextPage = ref(false);
 const isActiveSearch = ref(true);
 
-// 活跃用户搜索状态
+// 活躍用戶搜索狀態
 const activeSearchType = ref('username');
 const activeUsernameSearch = ref('');
 const activeEmailSearch = ref('');
 const activeStartDate = ref('');
 const activeEndDate = ref('');
 
-// 已删除用户搜索状态
+// 已刪除用戶搜索狀態
 const deletedSearchType = ref('username');
 const deletedUsernameSearch = ref('');
 const deletedEmailSearch = ref('');
@@ -114,17 +116,18 @@ const searchUsers = async () => {
       users.value = data.users;
       currentPage.value = data.currentPage;
       totalPages.value = data.totalPages;
+      hasNextPage.value = currentPage.value < totalPages.value - 1;
       totalUsers.value = data.totalItems;
       if (users.value.length === 0) {
         message.value = '沒有找到匹配的用戶';
       }
     } else {
       users.value = [];
-      message.value = data.message || '搜尋失敗';
+      message.value = data.message || '搜索失敗';
     }
   } catch (error) {
-    console.error('搜尋用戶時出錯:', error);
-    message.value = '搜尋用戶時出錯';
+    console.error('搜索用戶時出錯:', error);
+    message.value = '搜索用戶時出錯';
     users.value = [];
   } finally {
     isLoading.value = false;
@@ -133,21 +136,32 @@ const searchUsers = async () => {
 
 const toggleDeleteUser = async (id, currentStatus) => {
   const action = currentStatus ? '恢復' : '刪除';
-  if (confirm(`您確定要${action}這個用戶嗎？`)) {
+  const result = await Swal.fire({
+    title: '確認操作',
+    text: `您確定要${action}這個用戶嗎？`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: '確定',
+    cancelButtonText: '取消'
+  });
+
+  if (result.isConfirmed) {
     isLoading.value = true;
     try {
       const response = await axios.delete(`http://localhost:8080/myapp/admin/users/toggleDelete/${id}`);
       const data = response.data;
       if (data.success) {
-        message.value = data.message;
+        Swal.fire('成功', data.message, 'success');
         await searchUsers();
         await fetchTotalUsers();
       } else {
-        message.value = data.message || `${action}失敗`;
+        Swal.fire('失敗', data.message || `${action}失敗`, 'error');
       }
     } catch (error) {
       console.error(`${action}用戶時出錯:`, error);
-      message.value = `${action}用戶時出錯`;
+      Swal.fire('錯誤', `${action}用戶時出錯`, 'error');
     } finally {
       isLoading.value = false;
     }
@@ -187,9 +201,23 @@ const handleSearch = () => {
   searchUsers();
 };
 
-const changePage = (newPage) => {
-  currentPage.value = newPage;
+const changePageSize = () => {
+  currentPage.value = 0;
   searchUsers();
+};
+
+const previousPage = () => {
+  if (currentPage.value > 0) {
+    currentPage.value--;
+    searchUsers();
+  }
+};
+
+const nextPage = () => {
+  if (hasNextPage.value) {
+    currentPage.value++;
+    searchUsers();
+  }
 };
 </script>
 
@@ -200,7 +228,7 @@ const changePage = (newPage) => {
         <div class="col-md-12">
           <div class="card">
             <div class="card-header pb-0">
-              <h5 class="mb-0">用戶搜尋</h5>
+              <h5 class="mb-0">用戶搜索</h5>
               <div class="d-flex align-items-center">
                 <argon-button 
                   color="secondary" 
@@ -213,24 +241,24 @@ const changePage = (newPage) => {
                 <div class="button-group ml-3">
                   <div v-if="isActiveSearch">
                     <argon-button color="info" size="sm" @click="activeSearchType = 'username'" :class="{ active: activeSearchType === 'username' }">
-                      名稱搜尋
+                      名稱搜索
                     </argon-button>
                     <argon-button color="info" size="sm" @click="activeSearchType = 'email'" :class="{ active: activeSearchType === 'email' }">
-                      Email搜尋
+                      Email搜索
                     </argon-button>
                     <argon-button color="info" size="sm" @click="activeSearchType = 'creationTime'" :class="{ active: activeSearchType === 'creationTime' }">
-                      創建時間搜尋
+                      創建時間搜索
                     </argon-button>
                   </div>
                   <div v-else>
                     <argon-button color="info" size="sm" @click="deletedSearchType = 'username'" :class="{ active: deletedSearchType === 'username' }">
-                      名稱搜尋
+                      名稱搜索
                     </argon-button>
                     <argon-button color="info" size="sm" @click="deletedSearchType = 'email'" :class="{ active: deletedSearchType === 'email' }">
-                      Email搜尋
+                      Email搜索
                     </argon-button>
                     <argon-button color="info" size="sm" @click="deletedSearchType = 'creationTime'" :class="{ active: deletedSearchType === 'creationTime' }">
-                      創建時間搜尋
+                      創建時間搜索
                     </argon-button>
                   </div>
                 </div>
@@ -271,7 +299,7 @@ const changePage = (newPage) => {
                         @click="handleSearch"
                         :disabled="isLoading || isSearchInputEmpty"
                       >
-                        搜尋
+                        搜索
                       </argon-button>
                     </div>
                   </div>
@@ -287,7 +315,9 @@ const changePage = (newPage) => {
               </div>
             </div>
             <div class="card-body">
-              <p v-if="message" class="text-danger">{{ message }}</p>
+              <p v-if="message" :class="{'text-success': message.includes('成功'), 'text-danger': !message.includes('成功')}">
+                {{ message }}
+              </p>
               <table class="table" v-if="users.length > 0">
                 <thead>
                   <tr>
@@ -319,17 +349,34 @@ const changePage = (newPage) => {
                 </tbody>
               </table>
               <p v-else class="text-muted">沒有找到任何用戶。</p>
-              <div class="d-flex justify-content-center mt-3">
-                <argon-button 
-                  v-for="page in totalPages" 
-                  :key="page" 
-                  :color="currentPage === page - 1 ? 'primary' : 'secondary'"
-                  size="sm" 
-                  @click="changePage(page - 1)"
-                  class="mx-1"
-                >
-                  {{ page }}
-                </argon-button>
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <div>
+                  每頁顯示：
+                  <select v-model="pageSize" @change="changePageSize">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                  </select>
+                </div>
+                <div>
+                  <argon-button 
+                    color="primary" 
+                    size="sm" 
+                    @click="previousPage" 
+                    :disabled="currentPage === 0"
+                  >
+                    上一頁
+                  </argon-button>
+                  <span class="mx-2">第 {{ currentPage + 1 }} 頁</span>
+                  <argon-button 
+                    color="primary" 
+                    size="sm" 
+                    @click="nextPage" 
+                    :disabled="!hasNextPage"
+                  >
+                    下一頁
+                  </argon-button>
+                </div>
               </div>
             </div>
           </div>

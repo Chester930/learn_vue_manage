@@ -45,6 +45,7 @@ const sales = {
 const userCount = ref(0);
 const creatorCount = ref(0);
 const courseCount = ref(0); 
+const monthlyTransactionAmount = ref(0);
 
 // 獲取用戶數量的函數
 const fetchUserCount = async () => {
@@ -77,11 +78,32 @@ const fetchCoursesCount = async () => {
   }
 };
 
+const fetchMonthlyTransactionAmount = async () => {
+  try {
+    const now = new Date();
+    const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    
+    const response = await axios.get('http://localhost:8080/myapp/admin/order/dateRange', {
+      params: {
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: endDate.toISOString().split('T')[0]
+      }
+    });
+    
+// 計算本月總交易金額
+monthlyTransactionAmount.value = response.data.reduce((sum, order) => sum + order.totalPrice, 0);
+  } catch (error) {
+    console.error("錯誤", error);
+  }
+};
+
 // 在組件加載時調用 fetchUserCount
 onMounted(() => {
   fetchUserCount();
   fetchCreatorCount();
   fetchCoursesCount(); // 添加此行來調用 fetchCoursesCount
+  fetchMonthlyTransactionAmount();
 });
 </script>
 
@@ -140,18 +162,15 @@ onMounted(() => {
           
           <div class="col-lg-3 col-md-6 col-12">
             <mini-statistics-card
-              title="今日交易金額"
-              value="$103,430"
-              description="
-              <!-- <span
-                class='text-sm font-weight-bolder text-success'
-                >+5%</span> than last month -->
-                <a href='/transaction' class='btn btn-warning mt-3 d-block'>查看詳情</a>"
-              :icon="{
-                component: 'ni ni-money-coins',
-                background: 'bg-gradient-warning',
-                shape: 'rounded-circle',
-              }"
+  title="本月交易金額"
+  :value="`$${monthlyTransactionAmount.toFixed(2)}`"
+  description="
+  <a href='/transaction' class='btn btn-warning mt-3 d-block'>查看詳情</a>"
+  :icon="{
+    component: 'ni ni-money-coins',
+    background: 'bg-gradient-warning',
+    shape: 'rounded-circle',
+  }"
             />
           </div>
         </div>

@@ -24,10 +24,18 @@
                 </div>
                 <div class="col-md-6">
                   <div v-if="searchType === 'createdAt'">
-                    <label for="startDate">起始日期:</label>
-                    <input type="date" id="startDate" v-model="startDate">
-                    <label for="endDate">結束日期:</label>
-                    <input type="date" id="endDate" v-model="endDate">
+                    <ArgonInput 
+                      id="startDate" 
+                      type="datetime-local" 
+                      placeholder="開始日期" 
+                      v-model="startDate"
+                    />
+                    <ArgonInput 
+                      id="endDate" 
+                      type="datetime-local" 
+                      placeholder="結束日期" 
+                      v-model="endDate"
+                    />
                   </div>
                   <div v-else-if="searchType === 'category'">
                     <select v-model="searchValue" class="form-select">
@@ -213,7 +221,7 @@
 </template>
 
 <script>
-import { ref, onMounted, computed, nextTick  } from 'vue';
+import { ref, onMounted, computed, nextTick } from 'vue';
 import axios from 'axios';
 import ArgonInput from "@/components/ArgonInput.vue";
 import ArgonButton from "@/components/ArgonButton.vue";
@@ -245,29 +253,58 @@ export default {
     const hasNextPage = ref(false);
 
     const apiEndpoint = computed(() => {
+      let endpoint = 'http://localhost:8080/myapp/admin/courses';
+      let params = new URLSearchParams();
+
       switch (searchType.value) {
         case 'title':
-          return `http://localhost:8080/myapp/admin/courses/search/title?title=${searchValue.value}`;
+          endpoint += '/search/title';
+          params.append('title', searchValue.value);
+          break;
         case 'description':
-          return `http://localhost:8080/myapp/admin/courses/search/description?description=${searchValue.value}`;
+          endpoint += '/search/description';
+          params.append('description', searchValue.value);
+          break;
         case 'status-true':
-          return `http://localhost:8080/myapp/admin/courses/status/true`;
+          endpoint += '/status/true';
+          break;
         case 'status-false':
-          return `http://localhost:8080/myapp/admin/courses/status/false`;
+          endpoint += '/status/false';
+          break;
         case 'category':
-          return `http://localhost:8080/myapp/admin/courses/category/${searchValue.value}`;
+          endpoint += `/category/${searchValue.value}`;
+          break;
         case 'creator':
-          return `http://localhost:8080/myapp/admin/courses/creator/${searchValue.value}`;
+          endpoint += `/creator/${searchValue.value}`;
+          break;
         case 'price-asc':
-          return 'http://localhost:8080/myapp/admin/courses/sort/price/asc';
+          endpoint += '/sort/price/asc';
+          break;
         case 'price-desc':
-          return 'http://localhost:8080/myapp/admin/courses/sort/price/desc';
+          endpoint += '/sort/price/desc';
+          break;
         case 'createdAt':
-          return `http://localhost:8080/myapp/admin/courses/search/createdAt?startDate=${startDate.value}&endDate=${endDate.value}`;
+          endpoint += '/search/createdAt';
+          params.append('startDate', formatDateForQuery(startDate.value));
+          params.append('endDate', formatDateForQuery(endDate.value));
+          break;
         default:
-          return 'http://localhost:8080/myapp/admin/courses';
+          // 使用默認端點
       }
+
+      // 添加分頁參數
+      params.append('page', currentPage.value.toString());
+      params.append('size', pageSize.value.toString());
+
+      return `${endpoint}?${params.toString()}`;
     });
+
+    // 修改這個輔助函數來格式化日期
+    const formatDateForQuery = (dateString) => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toISOString().slice(0, 19).replace('T', ' ');
+    };
 
     const fetchCourses = async () => {
       isLoading.value = true;
@@ -360,7 +397,14 @@ export default {
 
     const formatDate = (dateString) => {
       const date = new Date(dateString);
-      return date.toLocaleDateString();
+      return date.toLocaleString('zh-TW', { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+      });
     };
 
     const fetchVideoDetails = async (courseId) => {
@@ -432,7 +476,9 @@ export default {
       hasNextPage,
       changePageSize,
       previousPage,
-      nextPage
+      nextPage,
+      formatDateForQuery,
+      apiEndpoint
     };
   }
 };

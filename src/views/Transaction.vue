@@ -25,13 +25,13 @@
                   <template v-if="searchType === 'dateRange'">
                     <div class="d-flex">
                       <ArgonInput 
-                        type="date" 
+                        type="datetime-local" 
                         placeholder="開始日期" 
                         v-model="searchStartDate"
                         class="mr-2"
                       />
                       <ArgonInput 
-                        type="date" 
+                        type="datetime-local" 
                         placeholder="結束日期" 
                         v-model="searchEndDate"
                       />

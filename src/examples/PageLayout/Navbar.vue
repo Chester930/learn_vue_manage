@@ -26,7 +26,7 @@ defineProps({
         class="navbar-brand font-weight-bolder ms-lg-0 ms-3"
         :class="darkMode ? 'text-black' : 'text-white'"
         to="/"
-        >教育網後台</router-link
+        >LearnOcean教育網後台</router-link
       >
       <button
         class="shadow-none navbar-toggler ms-2"

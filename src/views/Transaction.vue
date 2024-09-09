@@ -53,6 +53,15 @@
                   >
                     搜尋
                   </ArgonButton>
+                  <ArgonButton 
+                    color="secondary" 
+                    size="sm" 
+                    @click="resetSearch"
+                    :disabled="isLoading"
+                    class="ml-2"
+                  >
+                    重置
+                  </ArgonButton>
                 </div>
               </div>
               <p v-if="message" :class="{'text-success': message.includes('成功'), 'text-danger': !message.includes('成功')}">
@@ -212,40 +221,40 @@ const fetchTransactions = async () => {
   transactions.value = [];
   selectedTransaction.value = null;
   try {
-    let url = 'http://localhost:8080/myapp/admin';
+    let url = 'http://localhost:8080/myapp/admin/order/allDesc';
     let params = {
       page: currentPage.value,
       size: pageSize.value,
     };
 
-    switch (searchType.value) {
-      case 'transactionId':
-        url += `/order/transaction/${searchValue.value}`;
-        break;
-      case 'courseId':
-        url += `/order/course/${searchValue.value}`;
-        break;
-      case 'courseName':
-        url += `/order/courseName`;
-        params.courseName = searchValue.value;
-        break;
-      case 'buyerId':
-        url += `/order/buyer/${searchValue.value}`;
-        break;
-      case 'buyerName':
-        url += `/order/buyerName`;
-        params.buyerName = searchValue.value;
-        break;
-      case 'creatorId':
-        url += `/order/creator/${searchValue.value}`;
-        break;
-      case 'dateRange':
-        url += `/order/dateRange`;
-        params.startDate = searchStartDate.value;
-        params.endDate = searchEndDate.value;
-        break;
-      default:
-        url += '/order/allDesc';
+    if (searchValue.value || (searchType.value === 'dateRange' && searchStartDate.value && searchEndDate.value)) {
+      switch (searchType.value) {
+        case 'transactionId':
+          url = `http://localhost:8080/myapp/admin/order/transaction/${searchValue.value}`;
+          break;
+        case 'courseId':
+          url = `http://localhost:8080/myapp/admin/order/course/${searchValue.value}`;
+          break;
+        case 'courseName':
+          url = `http://localhost:8080/myapp/admin/order/courseName`;
+          params.courseName = searchValue.value;
+          break;
+        case 'buyerId':
+          url = `http://localhost:8080/myapp/admin/order/buyer/${searchValue.value}`;
+          break;
+        case 'buyerName':
+          url = `http://localhost:8080/myapp/admin/order/buyerName`;
+          params.buyerName = searchValue.value;
+          break;
+        case 'creatorId':
+          url = `http://localhost:8080/myapp/admin/order/creator/${searchValue.value}`;
+          break;
+        case 'dateRange':
+          url = `http://localhost:8080/myapp/admin/order/dateRange`;
+          params.startDate = searchStartDate.value;
+          params.endDate = searchEndDate.value;
+          break;
+      }
     }
 
     const response = await axios.get(url, { params });
@@ -266,6 +275,15 @@ const fetchTransactions = async () => {
   } finally {
     isLoading.value = false;
   }
+};
+
+const resetSearch = () => {
+  searchType.value = 'transactionId';
+  searchValue.value = '';
+  searchStartDate.value = '';
+  searchEndDate.value = '';
+  currentPage.value = 0;
+  fetchTransactions();
 };
 
 const showTransactionDetails = (transaction) => {

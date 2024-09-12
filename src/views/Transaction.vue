@@ -70,28 +70,28 @@
               <table class="table" v-if="transactions.length > 0">
                 <thead>
                   <tr>
-                    <th>交易ID</th>
+                    <!-- <th>交易ID</th> -->
                     <th>購買者</th>
                     <th>購買者Email</th>
                     <th>課程ID</th>
                     <th>課程名稱</th>
                     <th>創作者</th>
                     <th>付款金額</th>
-                    <th>購買時間</th>
+                    <!-- <th>購買時間</th> -->
                     <th>付款方式</th>
                     <th>操作</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="transaction in transactions" :key="transaction.id">
-                    <td>{{ transaction.transactionId }}</td>
+                    <!-- <td>{{ transaction.transactionId }}</td> -->
                     <td>{{ transaction.buyer.username }}</td>
                     <td>{{ transaction.buyer.email }}</td>
                     <td>{{ transaction.orderItems[0].course.id }}</td>
                     <td>{{ transaction.orderItems[0].courseName }}</td>
                     <td>{{ transaction.orderItems[0].course.creator.nickname }}</td>
                     <td>{{ transaction.totalPrice }}</td>
-                    <td>{{ formatDate(transaction.createdAt) }}</td>
+                    <!-- <td>{{ formatDate(transaction.createdAt) }}</td> -->
                     <td>{{ transaction.paymentMethod }}</td>
                     <td>
                       <ArgonButton 

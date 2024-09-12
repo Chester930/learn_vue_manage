@@ -16,8 +16,6 @@
                     <option value="courseName">課程名稱</option>
                     <option value="buyerId">購買者ID</option>
                     <option value="buyerName">購買者名稱</option>
-                    <option value="creatorId">創作者ID</option>
-                    <option value="creatorName">創作者名稱</option>
                     <option value="dateRange">日期範圍</option>
                   </select>
                 </div>
@@ -198,8 +196,6 @@ const getPlaceholder = () => {
     case 'courseName': return '輸入課程名稱';
     case 'buyerId': return '輸入購買者ID';
     case 'buyerName': return '輸入購買者名稱';
-    case 'creatorId': return '輸入創作者ID';
-    case 'creatorName': return '輸入創作者名稱';
     default: return '輸入搜尋內容';
   }
 };
@@ -212,8 +208,17 @@ const formatDate = (dateString) => {
     day: '2-digit', 
     hour: '2-digit', 
     minute: '2-digit', 
-    second: '2-digit' 
+    second: '2-digit',
+    timeZone: 'Asia/Taipei' // 使用台北時區
   });
+};
+
+const adjustDateForTimezone = (dateString) => {
+  const date = new Date(dateString);
+  // 將選擇的時間向前調整 8 小時（UTC+8 到 UTC）
+  const adjustedDate = new Date(date.getTime() + 12 * 60 * 60 * 1000);
+  // 轉換為 ISO 字符串並只保留日期部分
+  return adjustedDate.toISOString().split('T')[0];
 };
 
 const fetchTransactions = async () => {
@@ -246,13 +251,10 @@ const fetchTransactions = async () => {
           url = `http://localhost:8080/myapp/admin/order/buyerName`;
           params.buyerName = searchValue.value;
           break;
-        case 'creatorId':
-          url = `http://localhost:8080/myapp/admin/order/creator/${searchValue.value}`;
-          break;
         case 'dateRange':
           url = `http://localhost:8080/myapp/admin/order/dateRange`;
-          params.startDate = searchStartDate.value;
-          params.endDate = searchEndDate.value;
+          params.startDate = adjustDateForTimezone(searchStartDate.value);
+          params.endDate = adjustDateForTimezone(searchEndDate.value);
           break;
       }
     }
